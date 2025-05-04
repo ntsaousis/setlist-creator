@@ -18,6 +18,7 @@ public class SetlistController {
     @GetMapping("/{mbid}")
     public ResponseEntity<String> getSetlists(@PathVariable  String mbid) {
        String response =  setlistService.fetchSetlists(mbid);
+        System.out.println("fetched data for " + mbid);
 
        return ResponseEntity.ok(response);
 

@@ -18,25 +18,22 @@ public class SetlistService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-//    @Value("${setlistfm.api-key}")
-//    private String  apiKey ;
-//
-//    @Value("${setlistfm.base-url}")
-//    private  String baseUrl;
-//
-//    @PostConstruct
-//    public void testApiKeyInjection() {
-//        System.out.println("✅ Injected API Key: " + apiKey);
-//    }
+    @Value("${setlistfm.api-key}")
+    private String  apiKey ;
+
+    @Value("${setlistfm.base-url}")
+    private  String baseUrl;
+
+
 
 
     public String fetchSetlists(String mbid) {
 //        String mbid = "b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d"; // The beatles
-        String url = "https://api.setlist.fm/rest/1.0/" + "artist/" + mbid;
+        String url = baseUrl + "artist/" + mbid;
 
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", "s9OCbtCM2YvcineTpHgobX9rNhtaoQtpGvRn" );
+        headers.set("x-api-key", apiKey );
         headers.set("Accept", "application/json");
         headers.set("User-Agent","my-java-client");
 
