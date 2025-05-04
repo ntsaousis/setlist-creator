@@ -1,2 +1,6 @@
-package gr.jujuras.setlistplaylist.services;public class SetlistService {
+package gr.jujuras.setlistplaylist.services;
+
+public class SetlistService {
+
+
 }
