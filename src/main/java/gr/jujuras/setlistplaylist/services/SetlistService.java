@@ -1,6 +1,7 @@
 package gr.jujuras.setlistplaylist.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 public class SetlistService {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
 //    @Value("${setlistfm.api-key}")
     private String  apiKey  = "s9OCbtCM2YvcineTpHgobX9rNhtaoQtpGvRn";
