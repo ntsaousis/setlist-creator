@@ -16,20 +16,19 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class SetlistService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
-    @Value("${setlistfm.api-key}")
-    private String  apiKey ;
+//    @Value("${setlistfm.api-key}")
+    private String  apiKey  = "s9OCbtCM2YvcineTpHgobX9rNhtaoQtpGvRn";
 
-    @Value("${setlistfm.base-url}")
-    private  String baseUrl;
-
-
+//    @Value("${setlistfm.base-url}")
+    private  String baseUrl = "https://api.setlist.fm/rest/1.0/";
 
 
-    public String fetchSetlists(String mbid) {
-//        String mbid = "b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d"; // The beatles
-        String url = baseUrl + "artist/" + mbid;
+
+
+    public String fetchSetlists(String mbid, int page) {
+        String url = baseUrl + "artist/" + mbid + "/setlists?p=" + page;
 
 
         HttpHeaders headers = new HttpHeaders();
@@ -41,19 +40,13 @@ public class SetlistService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-//
-//        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            return response.getBody();
-        } catch (HttpClientErrorException e) {
-            System.out.println("❌ HTTP Error: " + e.getStatusCode());
-            System.out.println("❌ Response Body: " + e.getResponseBodyAsString());
-            throw e;
-        }
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        return  response.getBody();
 
 
     }
+
+
 
 
 }

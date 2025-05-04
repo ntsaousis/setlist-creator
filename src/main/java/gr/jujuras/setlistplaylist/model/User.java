@@ -1,20 +1,25 @@
 package gr.jujuras.setlistplaylist.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
-
+@Entity
 public class User implements UserDetails {
 
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+   private String username;
 
-    private String password;
+   private String password;
 
     @Override
     public boolean isAccountNonExpired() {

@@ -3,10 +3,7 @@ package gr.jujuras.setlistplaylist.controllers;
 import gr.jujuras.setlistplaylist.services.SetlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/setlists")
@@ -16,8 +13,9 @@ public class SetlistController {
     private final SetlistService setlistService;
 
     @GetMapping("/{mbid}")
-    public ResponseEntity<String> getSetlists(@PathVariable  String mbid) {
-       String response =  setlistService.fetchSetlists(mbid);
+    public ResponseEntity<String> getSetlists(@PathVariable  String mbid,
+                                              @RequestParam(defaultValue = "1") int page) {
+       String response =  setlistService.fetchSetlists(mbid, page);
         System.out.println("fetched data for " + mbid);
 
        return ResponseEntity.ok(response);
