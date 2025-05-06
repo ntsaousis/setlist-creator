@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
 
@@ -25,18 +26,18 @@ import java.util.Optional;
 @Service
 public class SetlistService {
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final String  apiKey;
     private final String baseUrl;
 
 
     @Autowired
-    public SetlistService(RestTemplate restTemplate,
+    public SetlistService(RestClient restClient,
                           ObjectMapper objectMapper,
                           @Value("${setlistfm.api-key}") String apiKey,
                           @Value("${setlistfm.base-url}") String baseUrl) {
-        this.restTemplate = restTemplate;
+        this.restClient = restClient;
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
@@ -57,8 +58,12 @@ public class SetlistService {
         String url = "http://musicbrainz.org/ws/2/artist/?query=" + encodedArtist + "&fmt=json";
 
         try {
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            JsonNode root = objectMapper.readTree(response.getBody());
+            String response = restClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(response);
             JsonNode artists = root.path("artists");
 
             if (artists.isArray() && !artists.isEmpty()) {
@@ -75,19 +80,18 @@ public class SetlistService {
     private String fetchSetlists(String mbid, int page) {
         String url = baseUrl + "artist/" + mbid + "/setlists?p=" + page;
 
-        HttpHeaders headers= createHeaders();
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    entity,
-                    String.class
-            );
-            return response.getBody();
-        } catch (HttpClientErrorException e) {
-            throw new RuntimeException("Failed to fetch setlists from Setlist.fm");
+            return restClient.get()
+                    .uri(url)
+                    .headers(headers -> {
+                        headers.set("x-api-key", apiKey);
+                        headers.set("Accept", "application/json");
+                        headers.set("User-Agent", "my-java-client");
+                    })
+                    .retrieve()
+                    .body(String.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch stelists");
         }
 
     }
@@ -129,14 +133,7 @@ public class SetlistService {
     }
 
 
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", apiKey);
-        headers.set("Accept", "application/json");
-        headers.set("User-Agent", "my-java-client");
-        System.out.println("Headers created");
-        return headers;
-    }
+
 
 }
 
