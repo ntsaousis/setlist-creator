@@ -115,7 +115,7 @@ public class SetlistService {
                             for (JsonNode song : songs) {
                                 songNames.add(song.path("name").asText());
                             }
-                            return new SetDTO(songNames);
+                            return new SetDTO(artistName, songNames);
                         }
                     }
                 }

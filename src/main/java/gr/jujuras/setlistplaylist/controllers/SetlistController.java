@@ -30,6 +30,7 @@ public class SetlistController {
 
     @GetMapping("/first-set/{name}")
     public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name) throws ArtistNotFoundException {
+        System.out.println("Creating setist " + name);
         return ResponseEntity.ok(setlistService.getFirstValidSetByArtist(name));
     }
 
