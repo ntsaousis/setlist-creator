@@ -20,8 +20,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()// 👈 allow public access
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()))// ✅ modern way to disable CSRF
+                .csrf(csrf -> csrf.disable())// ✅ modern way to disable CSRF
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
