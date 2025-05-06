@@ -1,9 +1,6 @@
 package gr.jujuras.setlistplaylist.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id

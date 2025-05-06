@@ -15,10 +15,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/setlists/**").permitAll()  // 👈 allow public access
+                        .requestMatchers("/api/setlists/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()// 👈 allow public access
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable()) // ✅ modern way to disable CSRF
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))// ✅ modern way to disable CSRF
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
