@@ -140,13 +140,13 @@ public class SetlistService {
 
 //    }
 
-    private JsonNode parseSetlistArray(String json) throws SetNotFoundException {
+    private JsonNode parseSetlistArray(String json) {
         try {
             JsonNode root = objectMapper.readTree(json);
             JsonNode setlists = root.path("setlist");
 
             if (!setlists.isArray()) {
-                throw new SetNotFoundException("No setlist array found.");
+                throw new SetNotFoundException("Invalid setlist structure in API response.");
             }
 
             return setlists;
@@ -155,7 +155,8 @@ public class SetlistService {
         }
     }
 
-    private List<String> extractFirstValidSet(JsonNode setlist) throws SetNotFoundException {
+
+    private List<String> extractFirstValidSet(JsonNode setlist)  {
         JsonNode sets = setlist.path("sets").path("set");
         if (!sets.isArray()) throw new SetNotFoundException("No valid setlist");
 

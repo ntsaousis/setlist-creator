@@ -20,7 +20,7 @@ public class SetlistController {
 
     @GetMapping("/{artistName}")
     public ResponseEntity<String> getSetlists(@PathVariable  String artistName,
-                                              @RequestParam(defaultValue = "1") int page) throws ArtistNotFoundException {
+                                              @RequestParam(defaultValue = "1") int page) {
        String response =  setlistService.getSetlistsByArtist(artistName, page);
         System.out.println("fetched data for " + artistName);
 
@@ -30,7 +30,7 @@ public class SetlistController {
     }
 
     @GetMapping("/first-set/{name}")
-    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name) throws ArtistNotFoundException, SetNotFoundException {
+    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name)  {
         System.out.println("Creating setist " + name);
         return ResponseEntity.ok(setlistService.getFirstValidSetByArtist(name));
     }
