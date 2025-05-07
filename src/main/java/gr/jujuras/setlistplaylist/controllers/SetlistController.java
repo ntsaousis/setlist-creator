@@ -1,6 +1,7 @@
 package gr.jujuras.setlistplaylist.controllers;
 
 import gr.jujuras.setlistplaylist.core.exceptions.ArtistNotFoundException;
+import gr.jujuras.setlistplaylist.core.exceptions.SetNotFoundException;
 import gr.jujuras.setlistplaylist.dto.SetDTO;
 import gr.jujuras.setlistplaylist.services.SetlistService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class SetlistController {
     }
 
     @GetMapping("/first-set/{name}")
-    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name) throws ArtistNotFoundException {
+    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name) throws ArtistNotFoundException, SetNotFoundException {
         System.out.println("Creating setist " + name);
         return ResponseEntity.ok(setlistService.getFirstValidSetByArtist(name));
     }
