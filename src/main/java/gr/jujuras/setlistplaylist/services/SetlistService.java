@@ -39,21 +39,35 @@ public class SetlistService {
         this.baseUrl = baseUrl;
     }
 
-    public SetDTO getFirstValidSetByArtist(String artistName) throws SetNotFoundException, ArtistNotFoundException {
+//    public SetDTO getFirstValidSetByArtist(String artistName) throws SetNotFoundException, ArtistNotFoundException {
+//        String json = getSetlistsByArtist(artistName, 1);
+//        JsonNode setlists = parseSetlistArray(json);
+//
+//        for (JsonNode setlist : setlists) {
+//            List<String> validSet = extractFirstValidSet(setlist);
+//            if (validSet != null) {
+//                return new SetDTO(artistName, validSet);
+//            }
+//        }
+//
+//        throw new SetNotFoundException("No valid set (more than 5 songs) found for artist: " + artistName);
+//    }
+
+    public SetDTO getFirstValidSetByArtist(String artistName) {
         String json = getSetlistsByArtist(artistName, 1);
         JsonNode setlists = parseSetlistArray(json);
 
         for (JsonNode setlist : setlists) {
-            List<String> validSet = extractFirstValidSet(setlist);
-            if (validSet != null) {
-                return new SetDTO(artistName, validSet);
+            Optional<List<String>> validSet = extractFirstValidSet(setlist);
+            if (validSet.isPresent()) {
+                return new SetDTO(artistName, validSet.get());
             }
         }
 
-        throw new SetNotFoundException("No valid set (more than 5 songs) found for artist: " + artistName);
+        throw new SetNotFoundException(artistName);
     }
 
-    public String getSetlistsByArtist(String artistName, int page) throws ArtistNotFoundException {
+    public String getSetlistsByArtist(String artistName, int page)  {
         String mbid = getMbidFromArtistName(artistName)
                 .orElseThrow(() -> new ArtistNotFoundException("Artist was not found" + artistName));
         return fetchSetlists(mbid, page);
@@ -99,7 +113,7 @@ public class SetlistService {
                     .retrieve()
                     .body(String.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch stelists");
+            throw new SetNotFoundException("");
         }
 
     }
@@ -156,7 +170,7 @@ public class SetlistService {
     }
 
 
-    private List<String> extractFirstValidSet(JsonNode setlist)  {
+    private Optional<List<String>> extractFirstValidSet(JsonNode setlist)  {
         JsonNode sets = setlist.path("sets").path("set");
         if (!sets.isArray()) throw new SetNotFoundException("No valid setlist");
 
@@ -167,8 +181,7 @@ public class SetlistService {
                 .findFirst()
                 .map(songs -> StreamSupport.stream(songs.spliterator(), false)
                         .map(song -> song.path("name").asText())
-                        .toList())
-                .orElse(null);
+                        .toList());
     }
 
 }
