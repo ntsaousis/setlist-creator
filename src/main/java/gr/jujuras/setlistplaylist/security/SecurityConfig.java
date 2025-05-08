@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -20,7 +21,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()// 👈 allow public access
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())// ✅ modern way to disable CSRF
+                .csrf(AbstractHttpConfigurer::disable)// ✅ modern way to disable CSRF
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .httpBasic(Customizer.withDefaults())
                 .build();

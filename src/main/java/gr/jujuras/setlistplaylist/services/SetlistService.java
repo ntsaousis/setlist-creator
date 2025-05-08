@@ -24,19 +24,19 @@ public class SetlistService {
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
-    private final String  apiKey;
-    private final String baseUrl;
+    @Value("${setlistfm.api-key}")
+    private String  apiKey;
+    @Value("${setlistfm.base-url}")
+    private String baseUrl;
 
 
     @Autowired
     public SetlistService(RestClient restClient,
-                          ObjectMapper objectMapper,
-                          @Value("${setlistfm.api-key}") String apiKey,
-                          @Value("${setlistfm.base-url}") String baseUrl) {
+                          ObjectMapper objectMapper
+                          ) {
         this.restClient = restClient;
         this.objectMapper = objectMapper;
-        this.apiKey = apiKey;
-        this.baseUrl = baseUrl;
+
     }
 
 //    public SetDTO getFirstValidSetByArtist(String artistName) throws SetNotFoundException, ArtistNotFoundException {
@@ -69,7 +69,7 @@ public class SetlistService {
 
     public String getSetlistsByArtist(String artistName, int page)  {
         String mbid = getMbidFromArtistName(artistName)
-                .orElseThrow(() -> new ArtistNotFoundException("Artist was not found" + artistName));
+                .orElseThrow(() -> new ArtistNotFoundException("Artist was not found " + artistName));
         return fetchSetlists(mbid, page);
     }
 

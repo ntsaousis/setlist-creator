@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SetlistToPlaylistApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(SetlistToPlaylistApplication.class, args);
     }
 

@@ -11,8 +11,8 @@ import org.springframework.web.client.RestTemplate;
 public class AppConfig {
 
     @Bean
-    public RestClient restClient() {
-        return RestClient.create();
+    public RestClient restClient(RestClient.Builder builder) {
+        return builder.build();
     }
 
 }
