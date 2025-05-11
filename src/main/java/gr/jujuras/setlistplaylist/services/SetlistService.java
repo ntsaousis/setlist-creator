@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.jujuras.setlistplaylist.core.exceptions.ArtistNotFoundException;
 import gr.jujuras.setlistplaylist.core.exceptions.SetNotFoundException;
 import gr.jujuras.setlistplaylist.dto.SetDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,7 +13,6 @@ import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -30,7 +28,7 @@ public class SetlistService {
     private String baseUrl;
 
 
-    @Autowired
+
     public SetlistService(RestClient restClient,
                           ObjectMapper objectMapper
                           ) {
@@ -39,19 +37,6 @@ public class SetlistService {
 
     }
 
-//    public SetDTO getFirstValidSetByArtist(String artistName) throws SetNotFoundException, ArtistNotFoundException {
-//        String json = getSetlistsByArtist(artistName, 1);
-//        JsonNode setlists = parseSetlistArray(json);
-//
-//        for (JsonNode setlist : setlists) {
-//            List<String> validSet = extractFirstValidSet(setlist);
-//            if (validSet != null) {
-//                return new SetDTO(artistName, validSet);
-//            }
-//        }
-//
-//        throw new SetNotFoundException("No valid set (more than 5 songs) found for artist: " + artistName);
-//    }
 
     public SetDTO getFirstValidSetByArtist(String artistName) {
         String json = getSetlistsByArtist(artistName, 1);
@@ -73,9 +58,13 @@ public class SetlistService {
         return fetchSetlists(mbid, page);
     }
 
+    private String artistNameEncoder(String artistName) {
+        return UriUtils.encode(artistName, StandardCharsets.UTF_8);
+    }
+
 
     private Optional<String> getMbidFromArtistName(String artistName) {
-        String encodedArtist = UriUtils.encode(artistName, StandardCharsets.UTF_8);
+        var encodedArtist = artistNameEncoder(artistName);
         String url = "http://musicbrainz.org/ws/2/artist/?query=" + encodedArtist + "&fmt=json";
 
         try {
@@ -113,46 +102,11 @@ public class SetlistService {
                     .retrieve()
                     .body(String.class);
         } catch (Exception e) {
-            throw new SetNotFoundException("");
+            throw new SetNotFoundException("No setlist found");
         }
 
     }
-//    public SetDTO getFirstValidSetByArtist(String artistName) throws ArtistNotFoundException {
-//        String setlistJson = getSetlistsByArtist(artistName, 1);
-//
-//        try {
-//            JsonNode root = objectMapper.readTree(setlistJson);
-//            JsonNode setlists = root.path("setlist");
-//
-//            if (!setlists.isArray() || setlists.isEmpty()) {
-//                throw new SetNotFoundException("No setlists found for artist: " + artistName);
-//            }
-//
-//            for (JsonNode setlist : setlists) {
-//                JsonNode sets = setlist.path("sets").path("set");
-//
-//                if (sets.isArray()) {
-//                    for (JsonNode set : sets) {
-//                        JsonNode songs = set.path("song");
-//
-//                        if (songs.isArray() && songs.size() > 5) {
-//                            List<String> songNames = new ArrayList<>();
-//                            for (JsonNode song : songs) {
-//                                songNames.add(song.path("name").asText());
-//                            }
-//                            return new SetDTO(artistName, songNames);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            throw new SetNotFoundException("No valid set (more than 5 songs) found for artist: " + artistName);
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to parse setlist data: " + e.getMessage(), e);
-//        }
 
-//    }
 
     private JsonNode parseSetlistArray(String json) {
         try {

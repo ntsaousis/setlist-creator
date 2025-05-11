@@ -1,14 +1,11 @@
 package gr.jujuras.setlistplaylist.controllers;
 
-import gr.jujuras.setlistplaylist.core.exceptions.ArtistNotFoundException;
-import gr.jujuras.setlistplaylist.core.exceptions.SetNotFoundException;
 import gr.jujuras.setlistplaylist.dto.SetDTO;
 import gr.jujuras.setlistplaylist.services.SetlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -29,10 +26,10 @@ public class SetlistController {
 
     }
 
-    @GetMapping("/first-set/{name}")
-    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String name)  {
-        System.out.println("Creating setist " + name);
-        return ResponseEntity.ok(setlistService.getFirstValidSetByArtist(name));
+    @GetMapping("/first-set/{artistName}")
+    public ResponseEntity<SetDTO> getFirstSetByArtist(@PathVariable String artistName)  {
+        System.out.println("Creating setist " + artistName);
+        return ResponseEntity.ok(setlistService.getFirstValidSetByArtist(artistName));
     }
 
 
