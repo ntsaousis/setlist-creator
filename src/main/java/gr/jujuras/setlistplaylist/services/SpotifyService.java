@@ -23,9 +23,9 @@ public class SpotifyService {
         SpotifyPlaylist playlist = new SpotifyPlaylist();
         playlist.setPlaylistName("Metal Gods");
         playlist.setSpotifyPlaylistId("7xY123Abcd");
-        playlist.setSpotifyUserId("user123");
-        playlist.setArtistName("Judas Priest");
-        playlist.setTrackUris(List.of("spotify:track:1", "spotify:track:2"));
+        playlist.setSpotifyUserId("tsaousis");
+        playlist.setArtistName("Sakianakis Notis");
+        playlist.setTrackUris(List.of("spotify:track:1", "spotify:track:2","A Touch of Evil"));
         playlist.setCreatedAt(LocalDateTime.now());
 
         playlistRepository.save(playlist);
