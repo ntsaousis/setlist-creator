@@ -3,6 +3,7 @@ package gr.jujuras.setlistplaylist.core;
 
 import gr.jujuras.setlistplaylist.core.exceptions.ArtistNotFoundException;
 
+import gr.jujuras.setlistplaylist.core.exceptions.ExternalApiException;
 import gr.jujuras.setlistplaylist.core.exceptions.SetNotFoundException;
 import gr.jujuras.setlistplaylist.dto.ResponseMessageErrorDTO;
 import org.springframework.http.HttpStatus;
@@ -23,4 +24,11 @@ public class ErrorHandler {
     public ResponseEntity<ResponseMessageErrorDTO> handleSetNotFound(SetNotFoundException ex, WebRequest request) {
         return new ResponseEntity<>(new ResponseMessageErrorDTO(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler({ExternalApiException.class})
+    public ResponseEntity<ResponseMessageErrorDTO> handleSetNotFound(ExternalApiException ex, WebRequest request) {
+        return new ResponseEntity<>(new ResponseMessageErrorDTO(ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+
 }
