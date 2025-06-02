@@ -12,12 +12,13 @@ import java.util.List;
 @Service
 public class SpotifyService {
 
+
     private final SpotifyPlaylistRepository playlistRepository;
 
-    @Autowired
     public SpotifyService(SpotifyPlaylistRepository playlistRepository) {
         this.playlistRepository = playlistRepository;
     }
+
 
     public void saveSamplePlaylist() {
         SpotifyPlaylist playlist = new SpotifyPlaylist();
