@@ -306,7 +306,7 @@ public class SpotifyService {
                     .map(SpotifyTrackDTO::getUri)
                     .collect(Collectors.toList());
 
-            // Step 3: Create playlist
+            // Step 3: Creates a playlist
             String description = String.format("Setlist playlist for %s - Created by Setlist-Playlist",
                     artistName);
             PlaylistResponseDTO playlistResponse = createPlaylist(
@@ -317,7 +317,7 @@ public class SpotifyService {
                     accessToken
             );
 
-            // Step 4: Add tracks to playlist
+            // Step 4: Add tracks to the playlist
             addTracksToPlaylist(playlistResponse.getId(), trackUris, accessToken);
 
             // Step 5: Save to MongoDB
@@ -329,12 +329,20 @@ public class SpotifyService {
             playlist.setTrackUris(trackUris);
             playlist.setCreatedAt(LocalDateTime.now());
 
-            SpotifyPlaylist savedPlaylist = playlistRepository.save(playlist);
-
-            logger.info("Successfully created and saved playlist '{}' with {} tracks (ID: {})",
-                    playlistName, trackUris.size(), savedPlaylist.getId());
-
-            return savedPlaylist;
+            // Try to save it to MongoDB, but don't fail if MongoDB is unavailable
+            try {
+                SpotifyPlaylist savedPlaylist = playlistRepository.save(playlist);
+                logger.info("Successfully created and saved playlist '{}' with {} tracks (ID: {})",
+                        playlistName, trackUris.size(), savedPlaylist.getId());
+                return savedPlaylist;
+            } catch (Exception mongoException) {
+                logger.warn("Playlist created on Spotify but failed to save to MongoDB: {}",
+                        mongoException.getMessage());
+                logger.info("Successfully created playlist '{}' with {} tracks on Spotify (ID: {})",
+                        playlistName, trackUris.size(), playlistResponse.getId());
+                // Return the playlist object even though it's not saved to DB
+                return playlist;
+            }
         } catch (ExternalApiException e) {
             throw e;
         } catch (Exception e) {

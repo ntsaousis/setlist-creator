@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Login from './components/Login';
 import ArtistSearch from './components/ArtistSearch';
-import { getAccessTokenFromUrl, isAuthenticated } from './services/spotifyAuth';
+import { handleCallback, isAuthenticated } from './services/spotifyAuth';
 import './App.css';
 
 /**
@@ -13,17 +13,28 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for access token in URL (OAuth callback)
-    const tokenFromUrl = getAccessTokenFromUrl();
+    const initAuth = async () => {
+      console.log('Initializing authentication...');
+      console.log('Current URL:', window.location.href);
 
-    if (tokenFromUrl) {
-      setAuthenticated(true);
-    } else {
-      // Check if already authenticated
-      setAuthenticated(isAuthenticated());
-    }
+      // Check for authorization code in URL (OAuth callback)
+      const token = await handleCallback();
+      console.log('Token from callback:', token ? 'Received' : 'Not received');
 
-    setLoading(false);
+      if (token) {
+        console.log('Setting authenticated to true');
+        setAuthenticated(true);
+      } else {
+        // Check if already authenticated
+        const isAuth = isAuthenticated();
+        console.log('Already authenticated:', isAuth);
+        setAuthenticated(isAuth);
+      }
+
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   if (loading) {
