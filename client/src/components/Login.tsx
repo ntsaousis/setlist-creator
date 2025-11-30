@@ -4,12 +4,12 @@ import { loginWithSpotify } from '../services/spotifyAuth';
 /**
  * Login component with Spotify OAuth2 button
  */
-const Login = () => {
+const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>🎵 Setlist Playlist</h1>
-        <p>Create Spotify playlists from artist setlists</p>
+        <h2>Welcome!</h2>
+        <p>Connect your Spotify account to get started</p>
 
         <button
           className="spotify-login-btn"

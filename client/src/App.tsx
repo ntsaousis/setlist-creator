@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import Login from './components/Login';
 import ArtistSearch from './components/ArtistSearch';
 import { handleCallback, isAuthenticated } from './services/spotifyAuth';
@@ -8,12 +10,12 @@ import './App.css';
  * Main App component
  * Handles authentication state and routing
  */
-function App() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+const App: React.FC = () => {
+  const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = async (): Promise<void> => {
       console.log('Initializing authentication...');
       console.log('Current URL:', window.location.href);
 
@@ -48,9 +50,13 @@ function App() {
 
   return (
     <div className="App">
-      {authenticated ? <ArtistSearch /> : <Login />}
+      <Header />
+      <main className="main-content">
+        {authenticated ? <ArtistSearch /> : <Login />}
+      </main>
+      <Footer />
     </div>
   );
-}
+};
 
 export default App;

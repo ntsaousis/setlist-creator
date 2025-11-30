@@ -3,7 +3,7 @@
  * Uses Authorization Code Flow with PKCE (Proof Key for Code Exchange)
  */
 
-const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID || '';
 const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI || 'http://127.0.0.1:3000/callback';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
@@ -14,10 +14,18 @@ const SCOPES = [
   'playlist-modify-private'
 ];
 
+interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token?: string;
+  scope: string;
+}
+
 /**
  * Generates a random code verifier for PKCE
  */
-const generateCodeVerifier = () => {
+const generateCodeVerifier = (): string => {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return base64URLEncode(array);
@@ -26,7 +34,7 @@ const generateCodeVerifier = () => {
 /**
  * Generates code challenge from verifier
  */
-const generateCodeChallenge = async (verifier) => {
+const generateCodeChallenge = async (verifier: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const hash = await crypto.subtle.digest('SHA-256', data);
@@ -36,8 +44,8 @@ const generateCodeChallenge = async (verifier) => {
 /**
  * Base64 URL encoding (without padding)
  */
-const base64URLEncode = (buffer) => {
-  return btoa(String.fromCharCode(...buffer))
+const base64URLEncode = (buffer: Uint8Array): string => {
+  return btoa(String.fromCharCode(...Array.from(buffer)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
@@ -46,7 +54,7 @@ const base64URLEncode = (buffer) => {
 /**
  * Redirects user to Spotify authorization page
  */
-export const loginWithSpotify = async () => {
+export const loginWithSpotify = async (): Promise<void> => {
   // Generate and store code verifier
   const codeVerifier = generateCodeVerifier();
   sessionStorage.setItem('spotify_code_verifier', codeVerifier);
@@ -61,7 +69,7 @@ export const loginWithSpotify = async () => {
     scope: SCOPES.join(' '),
     code_challenge_method: 'S256',
     code_challenge: codeChallenge,
-    show_dialog: true
+    show_dialog: 'true'
   });
 
   window.location.href = `${AUTH_ENDPOINT}?${params.toString()}`;
@@ -70,7 +78,7 @@ export const loginWithSpotify = async () => {
 /**
  * Exchanges authorization code for access token
  */
-export const handleCallback = async () => {
+export const handleCallback = async (): Promise<string | null> => {
   console.log('handleCallback: Starting...');
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
@@ -124,7 +132,7 @@ export const handleCallback = async () => {
       throw new Error('Failed to exchange code for token');
     }
 
-    const data = await response.json();
+    const data: TokenResponse = await response.json();
     const accessToken = data.access_token;
     const expiresIn = data.expires_in;
 
@@ -132,7 +140,7 @@ export const handleCallback = async () => {
 
     // Store token
     sessionStorage.setItem('spotify_access_token', accessToken);
-    sessionStorage.setItem('spotify_token_expires', Date.now() + (expiresIn * 1000));
+    sessionStorage.setItem('spotify_token_expires', String(Date.now() + (expiresIn * 1000)));
 
     // Clean up
     sessionStorage.removeItem('spotify_code_verifier');
@@ -149,7 +157,7 @@ export const handleCallback = async () => {
 /**
  * Gets stored access token
  */
-export const getAccessToken = () => {
+export const getAccessToken = (): string | null => {
   const token = sessionStorage.getItem('spotify_access_token');
   const expires = sessionStorage.getItem('spotify_token_expires');
 
@@ -166,7 +174,7 @@ export const getAccessToken = () => {
 /**
  * Logs out by clearing stored token
  */
-export const logout = () => {
+export const logout = (): void => {
   sessionStorage.removeItem('spotify_access_token');
   sessionStorage.removeItem('spotify_token_expires');
   sessionStorage.removeItem('spotify_code_verifier');
@@ -176,6 +184,6 @@ export const logout = () => {
 /**
  * Checks if user is authenticated
  */
-export const isAuthenticated = () => {
+export const isAuthenticated = (): boolean => {
   return getAccessToken() !== null;
 };

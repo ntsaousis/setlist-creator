@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import { getFirstValidSetlist, createPlaylistFromSetlist } from '../services/api';
-import { logout } from '../services/spotifyAuth';
+
+interface Setlist {
+  artistName: string;
+  songs: string[];
+}
+
+interface CreatedPlaylist {
+  playlistName: string;
+  trackUris: string[];
+  spotifyPlaylistId: string;
+}
 
 /**
  * Artist search and playlist creation component
  */
-const ArtistSearch = () => {
-  const [artistName, setArtistName] = useState('');
-  const [setlist, setSetlist] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [createdPlaylist, setCreatedPlaylist] = useState(null);
-  const [creating, setCreating] = useState(false);
+const ArtistSearch: React.FC = () => {
+  const [artistName, setArtistName] = useState<string>('');
+  const [setlist, setSetlist] = useState<Setlist | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createdPlaylist, setCreatedPlaylist] = useState<CreatedPlaylist | null>(null);
+  const [creating, setCreating] = useState<boolean>(false);
 
   /**
    * Searches for artist's first valid setlist
    */
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     if (!artistName.trim()) {
@@ -32,7 +42,7 @@ const ArtistSearch = () => {
     try {
       const result = await getFirstValidSetlist(artistName);
       setSetlist(result);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to find setlist. Try another artist.');
       console.error('Search error:', err);
     } finally {
@@ -43,7 +53,7 @@ const ArtistSearch = () => {
   /**
    * Creates Spotify playlist from the found setlist
    */
-  const handleCreatePlaylist = async () => {
+  const handleCreatePlaylist = async (): Promise<void> => {
     if (!setlist) return;
 
     setCreating(true);
@@ -53,7 +63,7 @@ const ArtistSearch = () => {
       const playlistName = `${setlist.artistName} - Live Setlist`;
       const result = await createPlaylistFromSetlist(setlist.artistName, playlistName);
       setCreatedPlaylist(result);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create playlist. Please try again.');
       console.error('Playlist creation error:', err);
     } finally {
@@ -63,13 +73,6 @@ const ArtistSearch = () => {
 
   return (
     <div className="search-container">
-      <div className="header">
-        <h1>🎵 Setlist Playlist</h1>
-        <button className="logout-btn" onClick={logout}>
-          Logout
-        </button>
-      </div>
-
       <div className="search-card">
         <form onSubmit={handleSearch}>
           <div className="search-box">
