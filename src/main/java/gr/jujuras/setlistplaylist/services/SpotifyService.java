@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.jujuras.setlistplaylist.core.exceptions.ExternalApiException;
 import gr.jujuras.setlistplaylist.dto.spotify.*;
 import gr.jujuras.setlistplaylist.model.documents.SpotifyPlaylist;
+import gr.jujuras.setlistplaylist.model.documents.SpotifyUser;
 import gr.jujuras.setlistplaylist.repositories.mongo.SpotifyPlaylistRepository;
+import gr.jujuras.setlistplaylist.repositories.mongo.SpotifyUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +36,7 @@ public class SpotifyService {
     private static final String SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1";
 
     private final SpotifyPlaylistRepository playlistRepository;
+    private final SpotifyUserRepository userRepository;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
@@ -44,13 +47,16 @@ public class SpotifyService {
      * Constructs a new SpotifyService with required dependencies.
      *
      * @param playlistRepository repository for storing playlist data
+     * @param userRepository repository for storing user data
      * @param restClient REST client for making HTTP requests
      * @param objectMapper Jackson ObjectMapper for JSON processing
      */
     public SpotifyService(SpotifyPlaylistRepository playlistRepository,
+                          SpotifyUserRepository userRepository,
                           RestClient restClient,
                           ObjectMapper objectMapper) {
         this.playlistRepository = playlistRepository;
+        this.userRepository = userRepository;
         this.restClient = restClient;
         this.objectMapper = objectMapper;
     }
@@ -81,6 +87,54 @@ public class SpotifyService {
         } catch (Exception e) {
             logger.error("Error fetching user profile from Spotify: {}", e.getMessage(), e);
             throw new ExternalApiException("Failed to fetch user profile from Spotify", e);
+        }
+    }
+
+    /**
+     * Saves or updates a Spotify user in the database.
+     * If the user already exists (by Spotify user ID), updates their information and last login time.
+     * If the user is new, creates a new record with first and last login times.
+     *
+     * @param accessToken the OAuth2 access token
+     * @return SpotifyUser the saved user document
+     * @throws ExternalApiException if the API request fails
+     */
+    public SpotifyUser saveOrUpdateUser(String accessToken) {
+        logger.info("=== START: Saving or updating Spotify user ===");
+
+        try {
+            logger.debug("Fetching user profile from Spotify");
+            SpotifyUserProfileDTO profile = getUserProfile(accessToken);
+            logger.info("Retrieved profile for user: {} ({})", profile.getDisplayName(), profile.getId());
+
+            logger.debug("Checking if user already exists in database");
+            java.util.Optional<SpotifyUser> existingUser = userRepository.findBySpotifyUserId(profile.getId());
+
+            SpotifyUser user;
+            if (existingUser.isPresent()) {
+                user = existingUser.get();
+                user.setLastLoginAt(LocalDateTime.now());
+                logger.info("Updating existing user: {} (MongoDB ID: {})", profile.getId(), user.getId());
+            } else {
+                user = new SpotifyUser();
+                user.setSpotifyUserId(profile.getId());
+                user.setFirstLoginAt(LocalDateTime.now());
+                user.setLastLoginAt(LocalDateTime.now());
+                logger.info("Creating NEW user: {}", profile.getId());
+            }
+
+            user.setDisplayName(profile.getDisplayName());
+            user.setEmail(profile.getEmail());
+            user.setCountry(profile.getCountry());
+            user.setProduct(profile.getProduct());
+
+            logger.debug("Saving user to MongoDB...");
+            SpotifyUser savedUser = userRepository.save(user);
+            logger.info("=== SUCCESS: User saved with MongoDB ID: {} ===", savedUser.getId());
+            return savedUser;
+        } catch (Exception e) {
+            logger.error("=== FAILED: Error saving or updating user: {} ===", e.getMessage(), e);
+            throw new ExternalApiException("Failed to save or update user", e);
         }
     }
 

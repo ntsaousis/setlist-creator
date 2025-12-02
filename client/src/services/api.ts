@@ -17,6 +17,17 @@ export interface PlaylistResponse {
   spotifyPlaylistId: string;
 }
 
+export interface SpotifyUser {
+  id: string;
+  spotifyUserId: string;
+  displayName: string;
+  email: string;
+  country: string;
+  product: string;
+  firstLoginAt: string;
+  lastLoginAt: string;
+}
+
 /**
  * Creates axios instance with auth header
  */
@@ -72,5 +83,22 @@ export const createPlaylistFromSetlist = async (
 export const getUserPlaylists = async (): Promise<any> => {
   const api = createApiClient();
   const response = await api.get('/spotify/playlists');
+  return response.data;
+};
+
+/**
+ * Authenticate user and store in database
+ * Should be called after user logs in with Spotify
+ */
+export const authenticateUser = async (accessToken: string): Promise<SpotifyUser> => {
+  const response = await axios.post<SpotifyUser>(
+    `${API_BASE_URL}/spotify/authenticate`,
+    {},
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    }
+  );
   return response.data;
 };

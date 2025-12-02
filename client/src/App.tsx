@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import ArtistSearch from './components/ArtistSearch';
 import { handleCallback, isAuthenticated } from './services/spotifyAuth';
+import { authenticateUser } from './services/api';
 import './App.css';
 
 /**
@@ -25,6 +26,16 @@ const App: React.FC = () => {
 
       if (token) {
         console.log('Setting authenticated to true');
+
+        // Authenticate user and store in database
+        try {
+          const user = await authenticateUser(token);
+          console.log('User authenticated and stored:', user.displayName);
+        } catch (error) {
+          console.error('Failed to authenticate user:', error);
+          // Continue anyway - the user is still authenticated with Spotify
+        }
+
         setAuthenticated(true);
       } else {
         // Check if already authenticated

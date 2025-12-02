@@ -3,6 +3,7 @@ package gr.jujuras.setlistplaylist.controllers;
 import gr.jujuras.setlistplaylist.dto.CreatePlaylistRequestDTO;
 import gr.jujuras.setlistplaylist.dto.SetDTO;
 import gr.jujuras.setlistplaylist.model.documents.SpotifyPlaylist;
+import gr.jujuras.setlistplaylist.model.documents.SpotifyUser;
 import gr.jujuras.setlistplaylist.services.SetlistService;
 import gr.jujuras.setlistplaylist.services.SpotifyService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,32 @@ public class SpotifyController {
     private final SetlistService setlistService;
 
     /**
+     * Authenticates and stores the Spotify user in the database.
+     * This endpoint should be called after the user logs in with Spotify.
+     * It fetches the user's profile and saves/updates it in MongoDB.
+     *
+     * @param authHeader the Authorization header with Bearer token
+     * @return ResponseEntity with the saved SpotifyUser
+     */
+    @PostMapping("/authenticate")
+    public ResponseEntity<SpotifyUser> authenticateUser(
+            @RequestHeader("Authorization") String authHeader) {
+
+        logger.info("========================================");
+        logger.info("AUTHENTICATE ENDPOINT CALLED");
+        logger.info("========================================");
+
+        String accessToken = authHeader.replace("Bearer ", "").trim();
+        logger.info("Access token received (length: {})", accessToken.length());
+
+        SpotifyUser user = spotifyService.saveOrUpdateUser(accessToken);
+
+        logger.info("User authenticated: {} ({})", user.getDisplayName(), user.getSpotifyUserId());
+        logger.info("========================================");
+        return ResponseEntity.ok(user);
+    }
+
+    /**
      * Creates a Spotify playlist from an artist's setlist.
      * This endpoint orchestrates the full workflow:
      * 1. Fetches the artist's first valid setlist from Setlist.fm
@@ -53,6 +80,9 @@ public class SpotifyController {
 
         // Extract access token from "Bearer xxx" header
         String accessToken = authHeader.replace("Bearer ", "").trim();
+
+        // Auto-save/update user when they create a playlist
+        spotifyService.saveOrUpdateUser(accessToken);
 
         // Get the first valid setlist for the artist
         SetDTO setlist = setlistService.getFirstValidSetByArtist(request.getArtistName());
